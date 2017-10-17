@@ -1,0 +1,17 @@
+{
+  "name": "keeper",
+  "version": "1.0.0",
+  "description": "Personal password and secrets manager",
+  "main": "index.js",
+  "author": "Travis Peterson",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "cradle": "^0.7.1",
+    "hapi": "^16.6.2"
+  },
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "eslint-plugin-node": "^5.2.0"
+  }
+}
