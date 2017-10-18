@@ -1,5 +1,15 @@
 {
   "plugins": ["node"],
   "extends": ["eslint:recommended", "plugin:node/recommended"],
-  "rules": {}
+  "parser": "babel-eslint",
+  "rules": {
+    "semi": ["error", "always"],
+    "no-console": 0
+  },
+  "env": {
+    "jest": true
+  },
+  "globals": {
+    "request": true
+  }
 }

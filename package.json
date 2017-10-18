@@ -9,12 +9,20 @@
   "engines": {
     "node": ">=8.7.0"
   },
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
-    "cradle": "^0.7.1",
     "hapi": "^16.6.2"
   },
   "devDependencies": {
+    "babel-eslint": "^8.0.1",
     "eslint": "^4.9.0",
-    "eslint-plugin-node": "^5.2.0"
+    "eslint-plugin-node": "^5.2.0",
+    "jest": "^21.2.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupTestFrameworkScriptFile": "<rootDir>/test/setup.js"
   }
 }
