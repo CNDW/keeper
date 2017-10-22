@@ -1,17 +1,37 @@
-const server = require('../api');
+// mock-couch is using a dependency that is trying to reference the
+// depricated process.EventEmitter api, need to shim it here
+process.EventEmitter = require('events'); // eslint-disable-line
+const http = require('http');
+const { OutgoingMessage } = require('_http_outgoing'); // eslint-disable-line
+const MockCouch = require('mock-couch');
+const portfinder = require('portfinder'); // eslint-disable-line
+const createServer = require('../api');
 
-beforeAll((done) => {
-  server.on('start', () => done());
-  server.start((err) => {
-    if (err) {
-      throw err;
-    }
-  });
+// Mock-Couch's restify overrides this function which breaks on node >8.0, undoing the damage
+require('restify/lib/response'); // eslint-disable-line
+http.ServerResponse.prototype.getHeaders = OutgoingMessage.prototype.getHeaders;
+http.ServerResponse.prototype.headers = OutgoingMessage.prototype.getHeaders;
+
+const server = createServer();
+const mockCouch = MockCouch.createServer();
+
+server.on('request-error', (err) => {
+  console.log(err);
 });
 
-afterAll((done) => {
-  server.on('stop', () => done());
-  server.stop();
+async function configureCouch() {
+  process.env.COUCH_PORT = await portfinder.getPortPromise();
+  mockCouch.listen(process.env.COUCH_PORT);
+}
+
+beforeAll((done) => {
+  configureCouch()
+    .then(() => done())
+    .catch(err => done(err));
+});
+
+afterAll(() => {
+  mockCouch.close();
 });
 
 const requestDefaults = {
@@ -19,7 +39,5 @@ const requestDefaults = {
 };
 
 global.request = function(options) {
-  return new Promise((resolve) => {
-    server.inject({...requestDefaults, ...options}, (res) => resolve(res));
-  });
+  return server.inject({...requestDefaults, ...options});
 };

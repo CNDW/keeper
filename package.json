@@ -13,13 +13,16 @@
     "test": "jest"
   },
   "dependencies": {
+    "got": "^7.1.0",
     "hapi": "^16.6.2"
   },
   "devDependencies": {
     "babel-eslint": "^8.0.1",
     "eslint": "^4.9.0",
     "eslint-plugin-node": "^5.2.0",
-    "jest": "^21.2.1"
+    "jest": "^21.2.1",
+    "mock-couch": "^0.1.9",
+    "portfinder": "^1.0.13"
   },
   "jest": {
     "testEnvironment": "node",

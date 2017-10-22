@@ -1,3 +1,5 @@
-export default class Model {
+module.exports = class Model {
+  constructor() {
 
+  }
 }
