@@ -1,12 +1,12 @@
 const server = require('./api');
-const DB = require('./api/db');
+const { db } = require('./api/db');
 
-DB.initialize.then(() => {
-  server.start((err) => {
-    if (err) {
-      throw err;
-    }
+server.app.db = db;
 
-    console.log(`Server running at: ${server.info.uri}`);
-  });
+server.start((err) => {
+  if (err) {
+    throw err;
+  }
+
+  console.log(`Server running at: ${server.info.uri}`);
 });

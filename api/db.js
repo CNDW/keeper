@@ -12,46 +12,51 @@ const DEFAULT_HEADERS = {
 
 const NAMESPACE = 'keeper';
 
-function request(opts={}) {
-  let { path='/' } = opts;
-  if (path[0] !== '/') path = `/${path}`;
-  return got({
-    ...DEFAULT_OPTS,
-    ...opts,
-    path: `/${NAMESPACE}${path}`,
-    headers: {
-      ...DEFAULT_HEADERS,
-      ...opts.headers || {}
-    }
-  });
-}
-
-function checkDB() {
-  return request({ method: 'HEAD' });
-}
-
-function createDB() {
-  return request({ method: 'PUT' });
-}
-
-async function initialize() {
-  let response;
-  try {
-    response = await checkDB();
-  } catch (err) {
-    if (err.statusCode === 404) {
-      response = await createDB();
-    } else {
-      throw err;
-    }
+class DB {
+  constructor(options={}) {
+    this.headers = { ...DEFAULT_HEADERS, ...options.headers || {} };
+    this.namespace = options.namespace || NAMESPACE;
+    this.requestOptions = { ...DEFAULT_OPTS, ...options.requestOptions || {} };
+    this.isInitialized = false;
   }
 
-  return response;
+  initialize() {
+    return this.checkDB(false)
+      .catch((err) => {
+        if (err.statusCode === 404) return this.createDB(false);
+        throw err;
+      })
+      .then(() => this.isInitialized = true);
+  }
+
+  checkDB(shouldInitialize) {
+    return this.send({ method: 'HEAD' }, shouldInitialize);
+  }
+
+  createDB(shouldInitialize) {
+    return this.send({ method: 'PUT' }, shouldInitialize);
+  }
+
+  getHeaders(headers={}) {
+    return {...this.headers, ...headers};
+  }
+
+  send(options={}, shouldInitialize=true) {
+    const compiledOptions = {
+      ...this.requestOptions,
+      ...options,
+      path: `/${this.namespace}/${options.path || ''}`,
+      headers: this.getHeaders(options.headers)
+    };
+
+    if (!this.isInitialized && shouldInitialize) {
+      return this.initialize().then(() => got(compiledOptions));
+    }
+
+    return got(compiledOptions);
+  }
 }
 
-module.exports = {
-  request,
-  initialize,
-  checkDB,
-  createDB
-};
+const db = new DB();
+
+module.exports = { DB, db };
