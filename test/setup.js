@@ -1,15 +1,16 @@
 const server = require('../api');
 const db = require('../api/db');
 
-server.app.db = db;
-db.namespace = `TEST-${db.namespace}`;
-
 server.on('request-error', (err) => {
   console.log(err);
 });
 
-beforeAll(() => {
-
+beforeAll(async () => {
+  if (!/^test-/i.test(db.namespace)) {
+    db.namespace = `test-${db.namespace}`;
+  }
+  await db.deleteNamespace();
+  await db.createNamespace();
 });
 
 afterAll(() => {
@@ -20,6 +21,4 @@ const requestDefaults = {
   method: 'GET'
 };
 
-global.request = function(options) {
-  return server.inject({...requestDefaults, ...options});
-};
+global.request = options => server.inject({...requestDefaults, ...options});
